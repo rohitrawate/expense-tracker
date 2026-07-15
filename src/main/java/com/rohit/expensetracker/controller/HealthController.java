@@ -1,5 +1,6 @@
 package com.rohit.expensetracker.controller;
 
+import com.rohit.expensetracker.dto.HealthResponse;
 import com.rohit.expensetracker.service.HealthService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +15,7 @@ public class HealthController {
     }
 
     @GetMapping("/api/v1/health")
-    public String health() {
+    public HealthResponse health() {
         return healthService.getStatus();
     }
 }

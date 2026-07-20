@@ -1,7 +1,10 @@
 package com.rohit.expensetracker.dto;
 
+import java.time.Instant;
+
 public record HealthResponse(
         String status,
         String application,
-        String version
+        String version,
+        Instant now
 ) {}

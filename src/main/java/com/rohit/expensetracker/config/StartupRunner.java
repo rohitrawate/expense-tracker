@@ -8,9 +8,9 @@ public class StartupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("==================================");
-        System.out.println("Expense Tracker Started");
-        System.out.println("Spring Boot is Ready!");
-        System.out.println("==================================");
+        System.out.println("--------------------------------------");
+        System.out.println("Expense Tracker Started Successfully");
+        System.out.println("Health Endpoint : http://localhost:8080/api/v1/health");
+        System.out.println("--------------------------------------");
     }
 }

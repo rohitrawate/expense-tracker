@@ -1,8 +1,6 @@
 package com.rohit.expensetracker.service;
 
 import com.rohit.expensetracker.dto.HealthResponse;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -12,27 +10,18 @@ import java.time.Instant;
 public class HealthService {
 
     private final Clock clock;
+    private final ApplicationInfoService appInfo;
 
-    public HealthService(Clock clock) {
+    public HealthService(Clock clock, ApplicationInfoService appInfo) {
         this.clock = clock;
-        System.out.println("1. Constructor Called");
-    }
-
-    @PostConstruct
-    public void intialize() {
-        System.out.println("2. PostConstruct Executed");
-    }
-    
-    @PreDestroy
-    public void destroy() {
-        System.out.println("3. Bean Destroyed");
+        this.appInfo = appInfo;
     }
 
     public HealthResponse getStatus() {
         return new HealthResponse(
                 "UP",
-                "Expense Tracker",
-                "0.0.1-SNAPSHOT",
+                appInfo.applicationName(),
+                appInfo.version(),
                 Instant.now(clock)
         );
     }

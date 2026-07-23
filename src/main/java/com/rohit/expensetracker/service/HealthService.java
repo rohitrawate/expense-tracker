@@ -1,6 +1,7 @@
 package com.rohit.expensetracker.service;
 
 import com.rohit.expensetracker.dto.HealthResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -9,11 +10,12 @@ import java.time.Instant;
 @Service
 public class HealthService {
 
-    private final Clock clock;
+    private final TimeService timeService;
     private final ApplicationInfoService appInfo;
 
-    public HealthService(Clock clock, ApplicationInfoService appInfo) {
-        this.clock = clock;
+    public HealthService(@Qualifier("localTimeService") TimeService timeService,
+                         ApplicationInfoService appInfo) {
+        this.timeService = timeService;
         this.appInfo = appInfo;
     }
 
@@ -22,7 +24,7 @@ public class HealthService {
                 "UP",
                 appInfo.applicationName(),
                 appInfo.version(),
-                Instant.now(clock)
+                timeService.currentTime()
         );
     }
 }

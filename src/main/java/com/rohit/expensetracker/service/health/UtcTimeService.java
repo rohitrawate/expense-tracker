@@ -1,9 +1,8 @@
-package com.rohit.expensetracker.service;
+package com.rohit.expensetracker.service.health;
 
 import java.time.Clock;
 import java.time.Instant;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service

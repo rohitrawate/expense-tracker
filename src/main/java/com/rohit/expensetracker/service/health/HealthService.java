@@ -1,11 +1,8 @@
-package com.rohit.expensetracker.service;
+package com.rohit.expensetracker.service.health;
 
 import com.rohit.expensetracker.dto.HealthResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.time.Clock;
-import java.time.Instant;
 
 @Service
 public class HealthService {

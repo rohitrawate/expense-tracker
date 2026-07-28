@@ -1,7 +1,6 @@
 
 package com.rohit.expensetracker.config;
 
-import com.rohit.expensetracker.service.HealthService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

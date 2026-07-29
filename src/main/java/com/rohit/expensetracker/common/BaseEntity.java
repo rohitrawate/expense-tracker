@@ -22,6 +22,7 @@ public abstract class BaseEntity {
     private Long id;
 
     @Column(
+            name = "uuid",
             nullable = false,
             unique = true,
             updatable = false
@@ -29,15 +30,29 @@ public abstract class BaseEntity {
     private UUID uuid;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(
+            name = "created_at",
+            nullable = false,
+            updatable = false
+    )
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(
+            name = "updated_at",
+            nullable = false
+    )
     private LocalDateTime updatedAt;
 
+    /**
+     * Optimistic locking.
+     * Useful later when concurrent updates occur.
+     */
+    @Version
+    private Long version;
+
     @PrePersist
-    public void prePersist() {
+    protected void prePersist() {
         if (uuid == null) {
             uuid = UUID.randomUUID();
         }

@@ -22,13 +22,13 @@ CREATE TABLE roles (
 CREATE TABLE user_roles (
             user_id BIGINT NOT NULL,
             role_id BIGINT NOT NULL,
-            PRIMARY KEY(user_id, role_id),
+            PRIMARY KEY(user_id, role_id),   -- Combination
 
-            CONSTRAINT fk_user
+            CONSTRAINT fk_user_roles_user
                 FOREIGN KEY(user_id)
                 REFERENCES users(id),
 
-            CONSTRAINT fk_role
+            CONSTRAINT fk_user_roles_role
                 FOREIGN KEY(role_id)
                 REFERENCES roles(id)
 );
@@ -39,12 +39,12 @@ CREATE TABLE refresh_tokens (
             uuid UUID NOT NULL UNIQUE,
             token VARCHAR(255) NOT NULL UNIQUE,
             expiry_date TIMESTAMP NOT NULL,
-            revoked BOOLEAN DEFAULT FALSE,
+            revoked BOOLEAN NOT NULL DEFAULT FALSE,
             user_id BIGINT NOT NULL,
             created_at TIMESTAMP NOT NULL,
             updated_at TIMESTAMP NOT NULL,
 
-            CONSTRAINT fk_refresh_user
+            CONSTRAINT fk_refresh_tokens_user
                 FOREIGN KEY(user_id)   -- foreign keys still reference id (BIGINT), not uuid.
                 REFERENCES users(id)
 );

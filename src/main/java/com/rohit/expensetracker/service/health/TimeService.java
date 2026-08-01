@@ -1,4 +1,4 @@
-package com.rohit.expensetracker.service;
+package com.rohit.expensetracker.service.health;
 
 public interface TimeService {
 

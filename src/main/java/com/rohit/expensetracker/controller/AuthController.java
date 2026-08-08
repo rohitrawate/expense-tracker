@@ -1,0 +1,31 @@
+package com.rohit.expensetracker.controller;
+
+import com.rohit.expensetracker.dto.auth.RegisterRequest;
+import com.rohit.expensetracker.dto.auth.RegisterResponse;
+import com.rohit.expensetracker.service.AuthenticationService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/auth")
+public class AuthController {
+
+    private final AuthenticationService authenticationService;
+
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponse> register(
+            @Valid @RequestBody RegisterRequest request  )
+    {
+        RegisterResponse response =  authenticationService.register(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .build();
+    }
+
+}

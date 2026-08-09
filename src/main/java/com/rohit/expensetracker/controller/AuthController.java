@@ -21,6 +21,8 @@ public class AuthController {
     public ResponseEntity<RegisterResponse> register(
             @Valid @RequestBody RegisterRequest request  )
     {
+        System.out.println(">>> Register endpoint invoked");
+
         RegisterResponse response =  authenticationService.register(request);
 
         return ResponseEntity

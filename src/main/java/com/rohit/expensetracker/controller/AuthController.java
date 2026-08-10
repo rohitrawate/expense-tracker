@@ -1,5 +1,6 @@
 package com.rohit.expensetracker.controller;
 
+import com.rohit.expensetracker.common.ApiResponse;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
 import com.rohit.expensetracker.dto.auth.RegisterResponse;
 import com.rohit.expensetracker.service.AuthenticationService;
@@ -18,16 +19,22 @@ public class AuthController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(
             @Valid @RequestBody RegisterRequest request  )
     {
         System.out.println(">>> Register endpoint invoked");
-
         RegisterResponse response =  authenticationService.register(request);
+
+        ApiResponse<RegisterResponse> apiResponse =
+                ApiResponse.<RegisterResponse>builder()
+                        .success(true)
+                        .message("User registered successfully")
+                        .data(response)
+                        .build();
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .build();
+                .body(apiResponse);
     }
 
 }

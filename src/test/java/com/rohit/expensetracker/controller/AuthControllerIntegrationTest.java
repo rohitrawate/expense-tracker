@@ -199,4 +199,37 @@ class AuthControllerIntegrationTest {
                 )
         ).isTrue();
     }
+
+    @Test
+    void shouldAssignDefaultUserRoleAfterRegistration() throws Exception {
+
+        String email = "role-test@example.com";
+
+        RegisterRequest request = new RegisterRequest(
+                                "Rohit",
+                                "Rawate",
+                                         email,
+                                "Spring@123"
+                        );
+
+        mockMvc.perform(
+                        post("/api/v1/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(request)
+                                )
+                )
+                .andExpect(
+                        status().isCreated()
+                );
+
+        var user = userRepository
+                .findWithRolesByEmail(email)
+                .orElseThrow();
+
+        assertTrue(
+                user.getRoles().stream()
+                        .anyMatch(role -> "ROLE_USER".equals(role.getName()))
+        );
+    }
 }

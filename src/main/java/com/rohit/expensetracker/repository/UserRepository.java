@@ -3,6 +3,8 @@ package com.rohit.expensetracker.repository;
 import com.rohit.expensetracker.entity.User;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -14,5 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     void deleteByUuid(UUID uuid);
+
+    @EntityGraph(attributePaths = "roles")
+    Optional<User> findWithRolesByEmail(String email);
 
 }

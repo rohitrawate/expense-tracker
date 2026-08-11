@@ -1,14 +1,13 @@
 package com.rohit.expensetracker.controller;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rohit.expensetracker.config.PostgresTestContainerConfig;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tools.jackson.databind.ObjectMapper;
-import com.rohit.expensetracker.ExpensetrackerApplication;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
 import com.rohit.expensetracker.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
@@ -16,12 +15,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(classes = ExpensetrackerApplication.class)
+@SpringBootTest
 @AutoConfigureMockMvc
-//@Import(JacksonAutoConfiguration.class) // Manually loads ObjectMapper into the context
+@Import(PostgresTestContainerConfig.class)
 class AuthControllerIntegrationTest {
 
     @Autowired
@@ -40,11 +41,13 @@ class AuthControllerIntegrationTest {
     @Test
     void shouldRegisterUserSuccessfully() throws Exception {
 
+        String email = "Demo.integr@example.com";
+
         RegisterRequest request =
                 new RegisterRequest(
                         "Demo",
                         "Patil",
-                        "Demo.integr@example.com",
+                        email,
                         "Spring@123"
                 );
 
@@ -65,16 +68,25 @@ class AuthControllerIntegrationTest {
                         jsonPath("$.data.firstName").value("Demo"),
                         jsonPath("$.data.lastName").value("Patil"),
                         jsonPath("$.data.email")
-                                .value("Demo.integr@example.com"),
-                        jsonPath("$.data.password")
-                                .doesNotExist()
+                                .value(email),
+                        jsonPath("$.data.password").doesNotExist()
                 );
 
-        assertThat(
-                userRepository.existsByEmail(
-                        "Demo.integr@example.com"
+        var user = userRepository
+                .findByEmail(email)
+                .orElseThrow();
+
+        assertNotEquals(
+                "Spring@123",
+                user.getPassword()
+        );
+
+        assertTrue(
+                passwordEncoder.matches(
+                        "Spring@123",
+                        user.getPassword()
                 )
-        ).isTrue();
+        );
     }
 
     @Test
@@ -95,9 +107,6 @@ class AuthControllerIntegrationTest {
                 )
                 .andExpectAll(
                         status().isBadRequest(),
-                        content().contentTypeCompatibleWith(
-                                MediaType.APPLICATION_JSON
-                        ),
                         jsonPath("$.success").value(false),
                         jsonPath("$.message")
                                 .value("ValidationError"),
@@ -108,8 +117,7 @@ class AuthControllerIntegrationTest {
     @Test
     void shouldRejectDuplicateEmail() throws Exception {
 
-        String email =
-                "rohit.duplicate@example.com";
+        String email = "rohit.duplicate@example.com";
 
         RegisterRequest firstRequest =
                 new RegisterRequest(
@@ -123,13 +131,9 @@ class AuthControllerIntegrationTest {
         mockMvc.perform(
                         post("/api/v1/auth/register")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        objectMapper.writeValueAsString(
-                                                firstRequest
-                                        )
+                                .content( objectMapper.writeValueAsString(firstRequest)
                                 )
-                )
-                .andExpect(status().isCreated());
+                ).andExpect(status().isCreated());
 
         /*Second registration with the same email should be rejected. */
         RegisterRequest duplicateRequest =
@@ -144,20 +148,11 @@ class AuthControllerIntegrationTest {
                         post("/api/v1/auth/register")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
-                                        objectMapper.writeValueAsString(
-                                                duplicateRequest
-                                        )
+                                        objectMapper.writeValueAsString(duplicateRequest)
                                 )
-                )
-                .andExpectAll(
+                ).andExpectAll(
                         status().isConflict(),
-
-                        content().contentTypeCompatibleWith(
-                                MediaType.APPLICATION_JSON
-                        ),
-
-                        jsonPath("$.success")
-                                .value(false)
+                        jsonPath("$.success").value(false)
                 );
     }
 

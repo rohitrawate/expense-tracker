@@ -1,6 +1,7 @@
 package com.rohit.expensetracker.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -85,5 +86,23 @@ public class GlobalExceptionHandler {
                 fieldError.getField(),
                 fieldError.getDefaultMessage()
         );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        ApiErrorResponse response =
+                new ApiErrorResponse(
+                        false,
+                        "A data integrity constraint was violated",
+                        Instant.now(),
+                        request.getRequestURI(),
+                        List.of()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(response);
     }
 }

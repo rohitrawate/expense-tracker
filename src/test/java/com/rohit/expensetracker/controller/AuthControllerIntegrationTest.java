@@ -2,6 +2,7 @@ package com.rohit.expensetracker.controller;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohit.expensetracker.config.PostgresTestContainerConfig;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tools.jackson.databind.ObjectMapper;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
@@ -13,6 +14,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -232,4 +238,81 @@ class AuthControllerIntegrationTest {
                         .anyMatch(role -> "ROLE_USER".equals(role.getName()))
         );
     }
+
+    @Test
+    void shouldAllowOnlyOneUserWhenTwoRequestsUseSameEmailConcurrently()
+            throws Exception {
+
+        String email = "concurrent@example.com";
+
+        RegisterRequest request =
+                new RegisterRequest(
+                        "Rohit",
+                        "Rawate",
+                        email,
+                        "Spring@123"
+                );
+
+        CountDownLatch startLatch = new CountDownLatch(1);
+
+        try (ExecutorService executor =
+                     Executors.newFixedThreadPool(2)) {
+
+            Future<Integer> firstRequest =
+                    executor.submit(() -> {
+
+                        startLatch.await();
+
+                        return mockMvc.perform(
+                                        post("/api/v1/auth/register")
+                                                .contentType(
+                                                        MediaType.APPLICATION_JSON
+                                                )
+                                                .content(
+                                                        objectMapper
+                                                                .writeValueAsString(
+                                                                        request
+                                                                )
+                                                )
+                                )
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+                    });
+
+            Future<Integer> secondRequest =
+                    executor.submit(() -> {
+
+                    startLatch.await();
+
+                    return mockMvc.perform(
+                                post("/api/v1/auth/register")
+                                        .contentType(
+                                                MediaType.APPLICATION_JSON
+                                        )
+                                        .content(
+                                                objectMapper
+                                                        .writeValueAsString(
+                                                                request
+                                                        )
+                                        )
+                        )
+                                .andReturn()
+                                .getResponse()
+                                .getStatus();
+                    });
+
+            startLatch.countDown();
+
+            int firstStatus = firstRequest.get();
+            int secondStatus = secondRequest.get();
+
+            Assertions.assertEquals(1, userRepository.countByEmail(email));
+
+            Assertions.assertEquals(201, firstStatus == 201 ? firstStatus : secondStatus);
+
+            Assertions.assertEquals(409, firstStatus == 409 ? firstStatus : secondStatus);
+        }
+    }
+
 }

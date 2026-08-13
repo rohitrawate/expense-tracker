@@ -3,11 +3,11 @@ package com.rohit.expensetracker.entity;
 import com.rohit.expensetracker.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -16,7 +16,7 @@ import java.util.Set;
 @Builder(toBuilder = true)
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
@@ -31,9 +31,11 @@ public class User extends BaseEntity {
     private String password;
 
     @Column(name = "enabled", nullable = false)
+    @Builder.Default
     private boolean enabled = true;
 
     @Column(name = "account_non_locked", nullable = false)
+    @Builder.Default
     private boolean accountNonLocked = true;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -54,4 +56,36 @@ public class User extends BaseEntity {
     )
     @Builder.Default
     private List<RefreshToken> refreshTokens = new ArrayList<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map( role -> new SimpleGrantedAuthority(role.getName()))
+                .toList();
+    }
+
+    @Override
+    public String getUsername(){
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+//    @Override
+//    public boolean isAccountNonLocked() {
+//        return Boolean.TRUE.equals(accountNonLocked);
+//    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+//    @Override
+//    public boolean isEnabled() {
+//        return Boolean.TRUE.equals(enabled);
+//    }
 }

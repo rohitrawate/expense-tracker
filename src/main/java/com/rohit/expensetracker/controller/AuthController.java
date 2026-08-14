@@ -1,6 +1,7 @@
 package com.rohit.expensetracker.controller;
 
 import com.rohit.expensetracker.common.ApiResponse;
+import com.rohit.expensetracker.dto.auth.LoginRequest;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
 import com.rohit.expensetracker.dto.auth.RegisterResponse;
 import com.rohit.expensetracker.service.AuthenticationService;
@@ -35,6 +36,19 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(apiResponse);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<Void>> login(
+            @Valid @RequestBody LoginRequest request) {
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Login endpoint reached")
+                        .data(null)
+                        .build()
+        );
     }
 
 }

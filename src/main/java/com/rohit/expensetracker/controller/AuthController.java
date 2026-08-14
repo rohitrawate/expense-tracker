@@ -42,10 +42,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> login(
             @Valid @RequestBody LoginRequest request) {
 
+        authenticationService.authenticate(request);
+
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .success(true)
-                        .message("Login endpoint reached")
+                        .message("Authentication successful")
                         .data(null)
                         .build()
         );

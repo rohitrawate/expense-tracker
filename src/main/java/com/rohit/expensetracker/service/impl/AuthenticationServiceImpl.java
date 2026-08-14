@@ -1,5 +1,6 @@
 package com.rohit.expensetracker.service.impl;
 
+import com.rohit.expensetracker.dto.auth.LoginRequest;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
 import com.rohit.expensetracker.dto.auth.RegisterResponse;
 import com.rohit.expensetracker.entity.Role;
@@ -11,13 +12,14 @@ import com.rohit.expensetracker.repository.RoleRepository;
 import com.rohit.expensetracker.repository.UserRepository;
 import com.rohit.expensetracker.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private static final String DEFAULT_ROLE = "ROLE_USER";
@@ -26,6 +28,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -47,5 +50,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User savedUser = userRepository.save(user);
 
         return userMapper.toRegisterResponse(savedUser);
+    }
+
+    @Override
+    public void authenticate(LoginRequest request) {
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        request.email(),
+                        request.password()
+                );
+
+        authenticationManager.authenticate(authenticationToken);
+
     }
 }

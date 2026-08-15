@@ -74,18 +74,18 @@ public class User extends BaseEntity implements UserDetails {
         return true;
     }
 
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return Boolean.TRUE.equals(accountNonLocked);
-//    }
+    @Override
+    public boolean isAccountNonLocked() {
+        return Boolean.TRUE.equals(accountNonLocked);
+    }
 
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-//    @Override
-//    public boolean isEnabled() {
-//        return Boolean.TRUE.equals(enabled);
-//    }
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(enabled);
+    }
 }

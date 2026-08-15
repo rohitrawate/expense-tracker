@@ -1,9 +1,11 @@
 package com.rohit.expensetracker.exception;
 
+import com.rohit.expensetracker.common.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -103,6 +105,41 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(response);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadCredentials(
+            BadCredentialsException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse response =
+                new ApiErrorResponse(
+                        false,
+                        "(Bad)Invalid email or password",
+                        Instant.now(),
+                        request.getRequestURI(),
+                        List.of()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(response);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(
+            AuthenticationException exception) {
+
+        ApiResponse<Void> response =
+                ApiResponse.<Void>builder()
+                        .success(false)
+                        .message("Invalid email or password")
+                        .data(null)
+                        .build();
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(response);
     }
 }

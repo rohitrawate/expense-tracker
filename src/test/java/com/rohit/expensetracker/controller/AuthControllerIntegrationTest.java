@@ -2,6 +2,7 @@ package com.rohit.expensetracker.controller;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohit.expensetracker.config.PostgresTestContainerConfig;
+import com.rohit.expensetracker.dto.auth.LoginRequest;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tools.jackson.databind.ObjectMapper;
@@ -313,6 +314,44 @@ class AuthControllerIntegrationTest {
 
             Assertions.assertEquals(409, firstStatus == 409 ? firstStatus : secondStatus);
         }
+    }
+
+    @Test
+    void shouldRejectLoginWithInvalidPassword() throws Exception {
+
+        LoginRequest request =
+                new LoginRequest(
+                        "registered@example.com",
+                        "WrongPassword"
+                );
+
+        mockMvc.perform(
+                        post("/api/v1/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(request)
+                                )
+                )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldRejectLoginForUnknownEmail() throws Exception {
+
+        LoginRequest request =
+                new LoginRequest(
+                        "does-not-exist@example.com",
+                        "Spring@123"
+                );
+
+        mockMvc.perform(
+                        post("/api/v1/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(request)
+                                )
+                )
+                .andExpect(status().isUnauthorized());
     }
 
 }

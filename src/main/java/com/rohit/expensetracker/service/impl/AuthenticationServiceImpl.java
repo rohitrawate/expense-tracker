@@ -14,6 +14,9 @@ import com.rohit.expensetracker.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,15 +56,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void authenticate(LoginRequest request) {
+    @Transactional(readOnly = true)
+    public Authentication authenticate(LoginRequest request) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(
+                UsernamePasswordAuthenticationToken.unauthenticated(
                         request.email(),
                         request.password()
                 );
 
-        authenticationManager.authenticate(authenticationToken);
+        Authentication authentication =
+                authenticationManager.authenticate(authenticationToken);
 
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+
+        context.setAuthentication(authentication);
+
+        SecurityContextHolder.setContext(context);
+
+        return authentication;
     }
 }

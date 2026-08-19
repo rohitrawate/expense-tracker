@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -49,6 +51,23 @@ public class AuthController {
                         .success(true)
                         .message("Authentication successful")
                         .data(null)
+                        .build()
+        );
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<String>> me() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .success(true)
+                        .message("Authenticated user")
+                        .data(authentication.getName())
                         .build()
         );
     }

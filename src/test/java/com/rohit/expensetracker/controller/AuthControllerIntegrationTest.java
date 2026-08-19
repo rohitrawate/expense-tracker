@@ -3,7 +3,9 @@ package com.rohit.expensetracker.controller;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohit.expensetracker.config.PostgresTestContainerConfig;
 import com.rohit.expensetracker.dto.auth.LoginRequest;
+import com.rohit.expensetracker.service.AuthenticationService;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tools.jackson.databind.ObjectMapper;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
@@ -43,6 +45,9 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationService authenticationService;
 
 
     @Test
@@ -352,6 +357,59 @@ class AuthControllerIntegrationTest {
                                 )
                 )
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldAuthenticateValidUser() throws Exception {
+
+        String email = "login-success@example.com";
+        String password = "Spring@123";
+
+        RegisterRequest registerRequest =
+                new RegisterRequest(
+                        "Rohit",
+                        "Rawate",
+                        email,
+                        password
+                );
+
+        mockMvc.perform(
+                post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                                objectMapper.writeValueAsString(
+                                        registerRequest
+                                )
+                        )
+        ).andExpect(
+                status().isCreated()
+        );
+
+        LoginRequest loginRequest =
+                new LoginRequest(
+                        email,
+                        password
+                );
+
+        Authentication authentication =
+                authenticationService.authenticate(loginRequest);
+
+        Assertions.assertTrue(authentication.isAuthenticated());
+
+        Assertions.assertEquals(
+                email,
+                authentication.getName()
+        );
+
+        Assertions.assertTrue(
+                authentication.getAuthorities()
+                        .stream()
+                        .anyMatch(authority ->
+                                "ROLE_USER".equals(
+                                        authority.getAuthority()
+                                )
+                        )
+        );
     }
 
 }

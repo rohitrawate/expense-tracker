@@ -1,6 +1,7 @@
 package com.rohit.expensetracker.service.impl;
 
 import com.rohit.expensetracker.dto.auth.LoginRequest;
+import com.rohit.expensetracker.dto.auth.LoginResponse;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
 import com.rohit.expensetracker.dto.auth.RegisterResponse;
 import com.rohit.expensetracker.entity.Role;
@@ -20,6 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +62,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Authentication authenticate(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 UsernamePasswordAuthenticationToken.unauthenticated(
@@ -74,6 +79,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         SecurityContextHolder.setContext(context);
 
-        return authentication;
+        User user = (User) authentication.getPrincipal();
+        Set<String> roles = user.getRoles()
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.toUnmodifiableSet());
+
+        return new LoginResponse(
+                user.getUuid(),
+                user.getEmail(),
+                roles
+        );
     }
 }

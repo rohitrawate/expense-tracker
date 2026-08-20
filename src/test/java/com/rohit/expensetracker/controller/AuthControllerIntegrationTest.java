@@ -3,8 +3,11 @@ package com.rohit.expensetracker.controller;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohit.expensetracker.config.PostgresTestContainerConfig;
 import com.rohit.expensetracker.dto.auth.LoginRequest;
+import com.rohit.expensetracker.dto.auth.LoginResponse;
 import com.rohit.expensetracker.service.AuthenticationService;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tools.jackson.databind.ObjectMapper;
@@ -48,6 +51,8 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
 
     @Test
@@ -385,14 +390,21 @@ class AuthControllerIntegrationTest {
                 status().isCreated()
         );
 
-        LoginRequest loginRequest =
-                new LoginRequest(
-                        email,
-                        password
+//        LoginRequest loginRequest =
+//                new LoginRequest(
+//                        email,
+//                        password
+//                );
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                email,
+                                password
+                        )
                 );
 
-        Authentication authentication =
-                authenticationService.authenticate(loginRequest);
+//        LoginResponse authentication =
+//                authenticationService.login(loginRequest);
 
         Assertions.assertTrue(authentication.isAuthenticated());
 

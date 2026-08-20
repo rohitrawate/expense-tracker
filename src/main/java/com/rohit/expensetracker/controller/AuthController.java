@@ -2,6 +2,7 @@ package com.rohit.expensetracker.controller;
 
 import com.rohit.expensetracker.common.ApiResponse;
 import com.rohit.expensetracker.dto.auth.LoginRequest;
+import com.rohit.expensetracker.dto.auth.LoginResponse;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
 import com.rohit.expensetracker.dto.auth.RegisterResponse;
 import com.rohit.expensetracker.service.AuthenticationService;
@@ -41,16 +42,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Void>> login(
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest request) {
 
-        authenticationService.authenticate(request);
+        LoginResponse response =
+                authenticationService.login(request);
 
         return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
+                ApiResponse.<LoginResponse>builder()
                         .success(true)
-                        .message("Authentication successful")
-                        .data(null)
+                        .message("Login successful")
+                        .data(response)
                         .build()
         );
     }

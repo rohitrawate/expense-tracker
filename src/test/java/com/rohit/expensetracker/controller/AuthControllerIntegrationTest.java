@@ -4,8 +4,11 @@ package com.rohit.expensetracker.controller;
 import com.rohit.expensetracker.config.PostgresTestContainerConfig;
 import com.rohit.expensetracker.dto.auth.LoginRequest;
 import com.rohit.expensetracker.dto.auth.LoginResponse;
+import com.rohit.expensetracker.security.JwtProperties;
+import com.rohit.expensetracker.security.JwtService;
 import com.rohit.expensetracker.service.AuthenticationService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,8 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -54,6 +56,12 @@ class AuthControllerIntegrationTest {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    private JwtService jwtService;
+
+    private static final String SECRET =
+            "cm9oaXRAZXhhbXBsZS5jb20=";
+
+    private static final long EXPIRATION = 900000L;
 
     @Test
     void shouldRegisterUserSuccessfully() throws Exception {
@@ -421,6 +429,54 @@ class AuthControllerIntegrationTest {
                                         authority.getAuthority()
                                 )
                         )
+        );
+    }
+
+    @BeforeEach
+    void setUp() {
+
+        JwtProperties jwtProperties =
+                new JwtProperties(
+                        SECRET,
+                        EXPIRATION
+                );
+
+        jwtService = new JwtService(jwtProperties);
+    }
+
+    @Test
+    void generateToken_shouldCreateValidJwt() {
+
+
+        String token =
+                jwtService.generateToken(
+                        "rohit@example.com"
+                );
+
+        assertNotNull(token);
+        assertFalse(token.isBlank());
+
+        assertEquals(
+                3,
+                token.split("\\.").length
+        );
+    }
+
+    @Test
+    void extractUsername_shouldReturnSubject() {
+
+        String username =
+                "rohit@example.com";
+
+        String token =
+                jwtService.generateToken(username);
+
+        String extractedUsername =
+                jwtService.extractUsername(token);
+
+        assertEquals(
+                username,
+                extractedUsername
         );
     }
 

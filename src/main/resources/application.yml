@@ -2,6 +2,11 @@ spring:
   application:
     name: expensetracker
 
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration: ${JWT_EXPIRATION:900000}
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/expense_tracker}
     username: ${SPRING_DATASOURCE_USERNAME:expense_user}

@@ -4,7 +4,7 @@ spring:
 
   security:
     jwt:
-      secret: ${JWT_SECRET}
+      secret: ${JWT_SECRET:ykKbX3/Xfk2NwWLzjcvH6E1NWKotA9D7aqCoKf/w+3w=}
       expiration: ${JWT_EXPIRATION:900000}
 
   datasource:

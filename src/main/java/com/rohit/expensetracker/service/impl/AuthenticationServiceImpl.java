@@ -11,6 +11,8 @@ import com.rohit.expensetracker.exception.RoleNotFoundException;
 import com.rohit.expensetracker.mapper.UserMapper;
 import com.rohit.expensetracker.repository.RoleRepository;
 import com.rohit.expensetracker.repository.UserRepository;
+import com.rohit.expensetracker.security.JwtProperties;
+import com.rohit.expensetracker.security.JwtService;
 import com.rohit.expensetracker.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +38,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final JwtProperties jwtProperties;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -80,15 +83,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         SecurityContextHolder.setContext(context);
 
         User user = (User) authentication.getPrincipal();
+
+        String accessToken = jwtService.generateToken(
+                authentication.getName()
+                );
+
         Set<String> roles = user.getRoles()
-                .stream()
-                .map(Role::getName)
-                .collect(Collectors.toUnmodifiableSet());
+                                .stream()
+                                .map(Role::getName)
+                                .collect(Collectors.toUnmodifiableSet());
 
         return new LoginResponse(
                 user.getUuid(),
                 user.getEmail(),
-                roles
+                roles,
+                accessToken,
+                "Bearer",
+                jwtProperties.expiration()
         );
     }
 }

@@ -56,10 +56,11 @@ class AuthControllerIntegrationTest {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
     private JwtService jwtService;
 
     private static final String SECRET =
-            "cm9oaXRAZXhhbXBsZS5jb20=";
+            "ykKbX3/Xfk2NwWLzjcvH6E1NWKotA9D7aqCoKf/w+3w=";
 
     private static final long EXPIRATION = 900000L;
 

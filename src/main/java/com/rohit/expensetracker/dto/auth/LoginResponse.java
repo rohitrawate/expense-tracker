@@ -6,5 +6,8 @@ import java.util.UUID;
 public record LoginResponse(
         UUID userId,
         String email,
-        Set<String> roles
+        Set<String> roles,
+        String accessToken,
+        String tokenType,
+        long expiresIn
     ) {  }

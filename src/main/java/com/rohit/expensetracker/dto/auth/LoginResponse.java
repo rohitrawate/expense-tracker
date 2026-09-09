@@ -9,5 +9,6 @@ public record LoginResponse(
         Set<String> roles,
         String accessToken,
         String tokenType,
-        long expiresIn
+        long expiresIn,
+        String refreshToken
     ) {  }

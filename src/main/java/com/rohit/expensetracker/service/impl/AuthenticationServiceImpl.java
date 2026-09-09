@@ -4,6 +4,7 @@ import com.rohit.expensetracker.dto.auth.LoginRequest;
 import com.rohit.expensetracker.dto.auth.LoginResponse;
 import com.rohit.expensetracker.dto.auth.RegisterRequest;
 import com.rohit.expensetracker.dto.auth.RegisterResponse;
+import com.rohit.expensetracker.entity.RefreshToken;
 import com.rohit.expensetracker.entity.Role;
 import com.rohit.expensetracker.entity.User;
 import com.rohit.expensetracker.exception.EmailAlreadyExistsException;
@@ -14,6 +15,7 @@ import com.rohit.expensetracker.repository.UserRepository;
 import com.rohit.expensetracker.security.JwtProperties;
 import com.rohit.expensetracker.security.JwtService;
 import com.rohit.expensetracker.service.AuthenticationService;
+import com.rohit.expensetracker.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,6 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -93,13 +96,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                 .map(Role::getName)
                                 .collect(Collectors.toUnmodifiableSet());
 
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
         return new LoginResponse(
                 user.getUuid(),
                 user.getEmail(),
                 roles,
                 accessToken,
                 "Bearer",
-                jwtProperties.expiration()
+                jwtProperties.expiration(),
+                refreshToken.getToken()
         );
     }
 }

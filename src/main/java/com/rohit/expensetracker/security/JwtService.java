@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -56,5 +57,15 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public boolean isTokenValid( String token, UserDetails userDetails) {
+        try {
+            String username = extractUsername(token);
+
+            return username.equals( userDetails.getUsername() );
+        } catch (Exception exception) {
+            return false;
+        }
     }
 }
